@@ -1,0 +1,218 @@
+═════════════════════════════════════════════════════════════════════
+  BITBURNER ALL-IN-ONE AUTOMATION SYSTEM - INSTALLATION INSTRUCTIONS
+═════════════════════════════════════════════════════════════════════
+
+Repository: https://github.com/aakarsh98/bitburner-all-in-one
+Version: 2.0.0
+Date: November 14, 2025
+
+═════════════════════════════════════════════════════════════════════
+
+🚀 METHOD 1: SUPER QUICK INSTALL (RECOMMENDED - 1 MINUTE)
+
+Copy this entire script into Bitburner and run it:
+
+───────────────────────────────────────────────────────────────────
+wget https://raw.githubusercontent.com/aakarsh98/bitburner-all-in-one/main/quick-deploy.js quick-deploy.js
+run quick-deploy.js
+───────────────────────────────────────────────────────────────────
+
+That's it! The script will:
+✓ Download all files automatically
+✓ Start the all-in-one automation system
+✓ Show you status and next steps
+
+═════════════════════════════════════════════════════════════════════
+
+🔧 METHOD 2: MANUAL INSTALL (IF METHOD 1 FAILS)
+
+Step 1: Download the update script
+───────────────────────────────────────────────────────────────────
+wget https://raw.githubusercontent.com/aakarsh98/bitburner-all-in-one/main/bitburner-update.js bitburner-update.js
+───────────────────────────────────────────────────────────────────
+
+Step 2: Download all scripts (takes 30-60 seconds)
+───────────────────────────────────────────────────────────────────
+run bitburner-update.js --all
+───────────────────────────────────────────────────────────────────
+
+Step 3: Start the automation!
+───────────────────────────────────────────────────────────────────
+run utils/auto-manager.js
+───────────────────────────────────────────────────────────────────
+
+═════════════════════════════════════════════════════════════════════
+
+📊 WHAT YOU GET
+
+10 Integrated Automation Modules:
+  1. 💰 Hacking - Auto target selection & deployment
+  2. 🖥️ Servers - Auto purchasing with ROI analysis
+  3. 🌐 Hacknet - Farm management
+  4. 🏛️ Factions - Auto-join & reputation farming
+  5. 🧬 Augmentations - Purchase planning
+  6. 🏢 Companies - Job applications & promotions
+  7. ⚔️ Bladeburner - Operations & skills
+  8. 👥 Gangs - Recruitment & ascension
+  9. 🏭 Corporations - Tracking & recommendations
+  10. 🎮 Go - Background game automation
+
+═════════════════════════════════════════════════════════════════════
+
+✅ VERIFY INSTALLATION
+
+Check if it's working:
+───────────────────────────────────────────────────────────────────
+run utils/auto-manager.js --monitor
+───────────────────────────────────────────────────────────────────
+
+You should see:
+✓ Module status (some may show "locked" - that's normal!)
+✓ Current income from hacking/hacknet
+✓ Server fleet information
+✓ Recent automation actions
+
+═════════════════════════════════════════════════════════════════════
+
+🎮 USING THE SYSTEM
+
+Basic Commands:
+───────────────────────────────────────────────────────────────────
+run utils/auto-manager.js              # Start full automation
+run utils/auto-manager.js --monitor    # Check status
+run utils/auto-manager.js --aggressive # Aggressive investing
+tail utils/auto-manager.js             # View live logs
+───────────────────────────────────────────────────────────────────
+
+Disable Modules:
+───────────────────────────────────────────────────────────────────
+run utils/auto-manager.js --no-go              # Disable Go
+run utils/auto-manager.js --no-factions        # Disable Factions
+run utils/auto-manager.js --no-companies       # Disable Companies
+───────────────────────────────────────────────────────────────────
+
+Test Individual Modules:
+───────────────────────────────────────────────────────────────────
+run modules/faction-manager.js
+run modules/go-commander.js
+run modules/gang-manager.js
+run go4.js                            # Play Go games directly
+───────────────────────────────────────────────────────────────────
+
+═════════════════════════════════════════════════════════════════════
+
+🔓 MODULE UNLOCK REQUIREMENTS
+
+Works from Day 1:
+  ✅ Hacking automation
+  ✅ Server management
+  ✅ Hacknet management
+  ✅ Go automation (once minigame unlocked)
+
+After First BitNode (SF4):
+  🔒 Faction automation
+  🔒 Company automation
+  🔒 Augmentation tracking
+
+Mid-Late Game:
+  🔒 Bladeburner (SF6/SF7)
+  🔒 Gangs (SF2 + join gang)
+  🔒 Corporations (SF3 + $150b)
+
+Don't worry! Locked modules auto-enable when you unlock the APIs.
+The core system works perfectly without them!
+
+═════════════════════════════════════════════════════════════════════
+
+⚡ TROUBLESHOOTING
+
+"Script not found" errors:
+  → Make sure bitburner-update.js --all completed successfully
+  → Check that folders were created (utils/, modules/, batch/, etc.)
+  → Re-run: run bitburner-update.js --all
+
+"Not enough RAM" errors:
+  → Auto-manager needs ~8-10GB RAM on home server
+  → Solution 1: Upgrade home RAM
+  → Solution 2: Use simpler version: run batch/smart-batcher.js
+
+Scripts not doing anything:
+  → Check logs: tail utils/auto-manager.js
+  → Check status: run utils/auto-manager.js --monitor
+  → Verify it's running: ps
+
+Making no money:
+  → Wait 5-10 minutes for the prep phase
+  → System needs time to:
+    • Analyze targets
+    • Deploy batch scripts
+    • Weaken servers to minimum security
+  → Check after prep: income should increase significantly
+
+Need to stop everything:
+  → run utils/global-kill.js
+
+═════════════════════════════════════════════════════════════════════
+
+📖 MORE INFORMATION
+
+Full Documentation:
+  https://github.com/aakarsh98/bitburner-all-in-one/blob/main/README.md
+
+Module Details:
+  https://github.com/aakarsh98/bitburner-all-in-one/blob/main/modules/README.md
+
+Deployment Guide:
+  https://github.com/aakarsh98/bitburner-all-in-one/blob/main/DEPLOYMENT_GUIDE.md
+
+Changelog:
+  https://github.com/aakarsh98/bitburner-all-in-one/blob/main/CHANGELOG.md
+
+═════════════════════════════════════════════════════════════════════
+
+🎯 QUICK START WORKFLOW
+
+For Complete Beginners:
+  1. Install using METHOD 1 (quick-deploy.js)
+  2. Wait 10-15 minutes while it sets up
+  3. Check status: run utils/auto-manager.js --monitor
+  4. Go AFK! System handles everything
+  5. Come back to see your progress
+
+For Advanced Players (SF4+):
+  1. Install using METHOD 1
+  2. System immediately starts using all available APIs
+  3. Modules auto-enable as you unlock them
+  4. Fully automated gameplay across all systems
+
+═════════════════════════════════════════════════════════════════════
+
+🆘 NEED HELP?
+
+Issue Tracker:
+  https://github.com/aakarsh98/bitburner-all-in-one/issues
+
+Common Solutions:
+  1. Re-download scripts: run bitburner-update.js --all
+  2. Restart automation: run utils/global-kill.js
+                        run utils/auto-manager.js
+  3. Check RAM: free
+  4. Upgrade home RAM if needed
+
+═════════════════════════════════════════════════════════════════════
+
+🎉 ENJOY YOUR AUTOMATED BITBURNER EXPERIENCE!
+
+The All-in-One System handles:
+  ✓ Making money (hacking + hacknet)
+  ✓ Joining factions
+  ✓ Working at companies
+  ✓ Planning augmentations
+  ✓ Running Bladeburner operations
+  ✓ Managing your gang
+  ✓ Playing Go games
+  ✓ Buying/upgrading servers
+
+Set it and forget it! 🤖
+
+═════════════════════════════════════════════════════════════════════
