@@ -212,6 +212,7 @@ export async function main(ns) {
         ns.print("  • SF2 (if unlocked): Gangs");
         ns.print("  • Automatically launches what you've unlocked");
         ns.print("  • Monitors and restarts if crashes");
+        ns.print("  • 📊 Real-time dashboard auto-launched!");
         ns.print("");
         deploymentSuccess = true;
       }

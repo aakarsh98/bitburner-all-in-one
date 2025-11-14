@@ -29,6 +29,13 @@ export async function main(ns) {
     checkInterval: 60000,  // Check every 60 seconds
     restartDelay: 5000,    // Wait 5 seconds before restarting crashed module
     
+    // Dashboard settings
+    dashboard: {
+      enabled: true,         // Auto-launch dashboard
+      script: "dashboard.js",
+      refreshRate: 2000      // Dashboard refresh rate (ms)
+    },
+    
     // RAM upgrade settings
     ramUpgrade: {
       enabled: true,          // Auto-upgrade home RAM
@@ -385,16 +392,49 @@ export async function main(ns) {
   if (CONFIG.ramUpgrade.enabled && failedModules.length > 0) {
     ns.print("💰 Will auto-upgrade RAM to launch failed modules");
   }
-  ns.print("");
-  ns.print("💡 Pro Tip: Run 'dashboard.js' for real-time monitoring!");
   ns.print("═════════════════════════════════════════════════════════");
   ns.print("");
+  
+  // Launch dashboard automatically
+  let dashboardPID = 0;
+  if (CONFIG.dashboard.enabled && scriptExists(CONFIG.dashboard.script)) {
+    ns.print("📊 Launching real-time dashboard...");
+    try {
+      dashboardPID = ns.run(CONFIG.dashboard.script, 1, `--refresh`, CONFIG.dashboard.refreshRate);
+      if (dashboardPID > 0) {
+        ns.print(`✓ Dashboard started! (PID: ${dashboardPID})`);
+        ns.print("   Monitor your automation in real-time!");
+      } else {
+        ns.print("⚠️  Dashboard failed to start (insufficient RAM?)");
+      }
+    } catch (e) {
+      ns.print(`⚠️  Dashboard error: ${e}`);
+    }
+    ns.print("");
+  }
   
   // Main monitoring loop
   let lastRAMCheck = Date.now();
   
   while (true) {
     await ns.sleep(CONFIG.checkInterval);
+    
+    // Check dashboard
+    if (dashboardPID > 0 && !isProcessRunning(dashboardPID)) {
+      ns.print("");
+      ns.print("⚠️  Dashboard crashed! Restarting...");
+      try {
+        dashboardPID = ns.run(CONFIG.dashboard.script, 1, `--refresh`, CONFIG.dashboard.refreshRate);
+        if (dashboardPID > 0) {
+          ns.print("✓ Dashboard restarted successfully");
+        } else {
+          ns.print("✗ Dashboard restart failed");
+        }
+      } catch (e) {
+        ns.print(`✗ Dashboard restart error: ${e}`);
+      }
+      ns.print("");
+    }
     
     // Check each running process
     for (const [moduleKey, processInfo] of runningProcesses.entries()) {

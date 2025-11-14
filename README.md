@@ -112,11 +112,7 @@ The auto-launcher:
 
 ### Real-Time Monitoring
 
-Want to see everything that's happening? Run the **comprehensive dashboard**:
-
-```bash
-run dashboard.js
-```
+The **comprehensive dashboard launches automatically** when you run auto-launcher!
 
 **The dashboard shows:**
 - 💰 Financial metrics (income, projections, balance)
@@ -129,6 +125,12 @@ run dashboard.js
 - 💡 Strategic recommendations
 
 **Updates every 2 seconds** with real-time KPIs and actionable insights!
+
+**Manual launch (if needed):**
+```bash
+run dashboard.js
+run dashboard.js --refresh 5000  # Custom refresh rate
+```
 
 ### Module Requirements
 
