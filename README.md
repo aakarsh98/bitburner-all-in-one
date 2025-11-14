@@ -12,108 +12,103 @@
 
 ---
 
-## 🤖 NEW: Modular Automation System (v2.0)
+## 🤖 NEW: One-Command Full Automation (v2.0)
 
-**Powerful modular automation** - Pick the features you need!
+**The true "set it and forget it" solution you wanted!**
 
-### Core Automation (START HERE)
+### The Perfect Solution: Auto-Launcher
 
-Run **ONE command** for intelligent hacking automation:
+Run **ONE command** and it handles EVERYTHING:
 
 ```bash
+run auto-launcher.js
+```
+
+**What it does:**
+- ✅ Detects which Source Files you've unlocked
+- ✅ Launches ALL applicable modules automatically
+- ✅ Monitors them and restarts if they crash
+- ✅ No manual intervention needed EVER
+
+**Modules it launches automatically:**
+- 💰 **Core** - Hacking (batch-manager), Hacknet farm
+- 🏛️ **SF4** - Factions, Companies, Augmentations (if unlocked)
+- ⚔️ **SF6/SF7** - Bladeburner (if unlocked)
+- 👥 **SF2** - Gangs (if unlocked)
+- 🏭 **SF3** - Corporations (if unlocked)
+- 🎮 **Go** - Go games (if unlocked)
+
+**Each module runs as a SEPARATE process** - modular architecture, automated management!
+
+### Alternative: Manual Module Launch
+
+If you want granular control, run modules individually:
+
+```bash
+# Core automation
 run batch/batch-manager.js
+
+# Add specific modules
+run modules/faction-manager.js       # SF4
+run modules/company-automator.js     # SF4
+run modules/bladeburner-commander.js # SF6/SF7
+run modules/gang-manager.js          # SF2
+run go4.js                           # Go games
 ```
 
-**Or use post-reset for automatic setup:**
-```bash
-run post-reset.js
-```
-
-This provides **core automation** with ~5-6GB RAM:
-
-- 💰 **Hacking** - Finds best targets, deploys smart-batcher automatically
-- 🖥️ **Servers** - Auto-roots new servers, detects RAM upgrades
-- 📊 **Smart redeployment** - Automatically adapts to your growing fleet
-
-### Optional Advanced Modules (SF4+)
-
-**Want more features?** Run additional modules as you unlock them:
-
-```bash
-# Faction automation (SF4)
-run modules/faction-manager.js
-
-# Company work (SF4)
-run modules/company-automator.js
-
-# Augmentation planning (SF4)
-run modules/augmentation-tracker.js
-
-# Bladeburner (SF6/SF7)
-run modules/bladeburner-commander.js
-
-# Gang management (SF2)
-run modules/gang-manager.js
-
-# Go games
-run go4.js
-```
-
-Each module runs **independently** with low RAM cost (2-4GB each)
+**But auto-launcher is better** - it handles everything automatically!
 
 ### Key Features
 
-✨ **True Idle Gaming**
-- Set up once, runs while you're AFK
-- Automatically adapts to RAM upgrades
-- Auto-roots new servers as you hack them
-- Scales from fresh game to end-game
+✨ **True "One Command" Automation**
+- ONE command launches everything
+- Auto-detects unlocked Source Files
+- Each module runs as separate process
+- Monitors and auto-restarts crashed modules
+- Zero manual intervention needed
 
-🎯 **Intelligent Automation**
-- Finds best targets automatically
-- ROI analysis for server purchases
-- Priority-based decision making (in modules)
-- Graceful handling of locked features
+🎯 **Intelligent Management**
+- Launches only what you've unlocked
+- Skips locked features gracefully
+- Tracks crashes and restarts failed modules
+- Shows status updates every minute
+- Runs forever in background
 
-📊 **Modular Design**
-- Start with core automation (~5-6GB)
-- Add modules as you unlock Source Files
-- Each module is independent
-- No wasted RAM on unavailable features
+📊 **Modular Architecture**
+- Modules run independently (no import issues!)
+- Each has dedicated RAM allocation
+- No "300GB RAM required" problem
+- Add features by unlocking Source Files
+- Everything scales automatically
 
-⚙️ **Easy to Customize**
-```bash
-# Core automation
-run batch/batch-manager.js [target]
-
-# With faction automation (if SF4+)
-run modules/faction-manager.js
-
-# Specify difficulty
-run go4.js --difficulty 1  # Go games
-```
+⚙️ **Smart & Automated**
+- Core hacking finds best targets automatically
+- Faction module joins and farms reputation
+- Company module seeks promotions
+- Augmentation module plans optimal purchases
+- Bladeburner runs operations efficiently
+- Gang module manages members and territory
+- Go module plays games in background
+- All working together, zero input from you!
 
 ### Quick Start
 
 **Step 1**: Download scripts (see [Installation](#🔧-installation-first) below)
 
-**Step 2**: Use automated recovery
+**Step 2**: Run ONE command
 ```bash
-run post-reset.js
+run auto-launcher.js
 ```
 
-**Or manually start core automation:**
-```bash
-run batch/batch-manager.js
-```
+**Step 3**: That's it! Go AFK and watch the automation work
 
-**Step 3**: Add optional modules when you unlock them:
-- SF4: Factions, Companies, Augmentations
-- SF6/SF7: Bladeburner
-- SF2: Gangs
-- Anytime: Go games, Hacknet
+The auto-launcher:
+- ✅ Starts all available modules automatically
+- ✅ Detects your unlocked Source Files
+- ✅ Monitors everything and restarts if crashes
+- ✅ Scales as you progress and unlock more features
 
-**Step 4**: Go AFK! The automation handles everything.
+**No further intervention needed!** As you complete BitNodes and unlock new Source Files, the modules automatically activate on next restart.
 
 ### Module Requirements
 

@@ -195,9 +195,34 @@ export async function main(ns) {
   
   let deploymentSuccess = false;
   
-  // Try batch-manager first (best option - auto-scales)
-  if (homeRAM >= 8) {
-    ns.print(`Starting batch-manager (intelligent automation)...`);
+  // Try auto-launcher first (best option - launches everything)
+  if (homeRAM >= 16) {
+    ns.print(`Starting auto-launcher (full automation suite)...`);
+    
+    try {
+      const pid = ns.run("auto-launcher.js", 1);
+      
+      if (pid > 0) {
+        ns.print("✓ Auto-launcher started!");
+        ns.print("");
+        ns.print("Full automation suite is running:");
+        ns.print("  • Core: Hacking, servers, hacknet");
+        ns.print("  • SF4 modules (if unlocked): Factions, companies, augs");
+        ns.print("  • SF6/SF7 (if unlocked): Bladeburner");
+        ns.print("  • SF2 (if unlocked): Gangs");
+        ns.print("  • Automatically launches what you've unlocked");
+        ns.print("  • Monitors and restarts if crashes");
+        ns.print("");
+        deploymentSuccess = true;
+      }
+    } catch (e) {
+      ns.print(`⚠️  Auto-launcher failed: ${e}`);
+    }
+  }
+  
+  // Fallback to batch-manager if auto-launcher didn't work
+  if (!deploymentSuccess && homeRAM >= 8) {
+    ns.print(`Starting batch-manager (core automation only)...`);
     
     try {
       const pid = ns.run("batch/batch-manager.js", 1, bestTarget.name, "--quiet");
@@ -205,10 +230,13 @@ export async function main(ns) {
       if (pid > 0) {
         ns.print("✓ Batch-manager started!");
         ns.print("");
-        ns.print("Intelligent automation is running:");
+        ns.print("Core automation is running:");
         ns.print("  • Auto-targets best servers");
         ns.print("  • Detects RAM upgrades automatically");
         ns.print("  • Scales as you grow");
+        ns.print("");
+        ns.print("For full automation with all modules:");
+        ns.print("  run auto-launcher.js");
         ns.print("");
         deploymentSuccess = true;
       }
