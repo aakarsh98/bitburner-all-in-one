@@ -195,9 +195,17 @@ export async function main(ns) {
   
   let deploymentSuccess = false;
   
-  // Try auto-launcher first (best option - launches everything)
-  if (homeRAM >= 16) {
-    ns.print(`Starting auto-launcher (full automation suite)...`);
+  // Try auto-launcher first (works on 8GB+, has smart fallback)
+  if (homeRAM >= 8) {
+    ns.print(`Starting auto-launcher (intelligent automation suite)...`);
+    ns.print("");
+    
+    if (homeRAM < 16) {
+      ns.print("ℹ️  Note: 8GB RAM detected");
+      ns.print("   Will use smart-batcher (lighter automation)");
+      ns.print("   Dashboard/RAM-upgrader disabled until 16GB");
+      ns.print("");
+    }
     
     try {
       const pid = ns.run("auto-launcher.js", 1);
@@ -205,14 +213,19 @@ export async function main(ns) {
       if (pid > 0) {
         ns.print("✓ Auto-launcher started!");
         ns.print("");
-        ns.print("Full automation suite is running:");
-        ns.print("  • Core: Hacking, servers, hacknet");
-        ns.print("  • SF4 modules (if unlocked): Factions, companies, augs");
-        ns.print("  • SF6/SF7 (if unlocked): Bladeburner");
-        ns.print("  • SF2 (if unlocked): Gangs");
-        ns.print("  • Automatically launches what you've unlocked");
-        ns.print("  • Monitors and restarts if crashes");
-        ns.print("  • 📊 Real-time dashboard auto-launched!");
+        
+        if (homeRAM >= 16) {
+          ns.print("Full automation suite is running:");
+          ns.print("  • Core: Batch-manager (full automation)");
+          ns.print("  • Dashboard: Real-time monitoring");
+          ns.print("  • RAM Upgrader: Auto-expansion");
+          ns.print("  • Modules: Launch as unlocked");
+        } else {
+          ns.print("Core automation is running:");
+          ns.print("  • Smart-batcher on " + bestTarget.name);
+          ns.print("  • Making money to upgrade RAM");
+          ns.print("  • Will auto-upgrade once you have 16GB+");
+        }
         ns.print("");
         deploymentSuccess = true;
       }
@@ -221,34 +234,9 @@ export async function main(ns) {
     }
   }
   
-  // Fallback to batch-manager if auto-launcher didn't work
-  if (!deploymentSuccess && homeRAM >= 8) {
-    ns.print(`Starting batch-manager (core automation only)...`);
-    
-    try {
-      const pid = ns.run("batch/batch-manager.js", 1, bestTarget.name, "--quiet");
-      
-      if (pid > 0) {
-        ns.print("✓ Batch-manager started!");
-        ns.print("");
-        ns.print("Core automation is running:");
-        ns.print("  • Auto-targets best servers");
-        ns.print("  • Detects RAM upgrades automatically");
-        ns.print("  • Scales as you grow");
-        ns.print("");
-        ns.print("For full automation with all modules:");
-        ns.print("  run auto-launcher.js");
-        ns.print("");
-        deploymentSuccess = true;
-      }
-    } catch (e) {
-      ns.print(`⚠️  Batch-manager failed: ${e}`);
-    }
-  }
-  
-  // Fallback to smart-batcher if batch-manager didn't work
-  if (!deploymentSuccess && homeRAM >= 5) {
-    ns.print(`Starting smart-batcher directly...`);
+  // Fallback to smart-batcher if auto-launcher didn't work
+  if (!deploymentSuccess && homeRAM >= 4) {
+    ns.print(`Starting smart-batcher directly (fallback mode)...`);
     
     try {
       const pid = ns.run("batch/smart-batcher.js", 1, bestTarget.name, 0.05);
@@ -257,8 +245,9 @@ export async function main(ns) {
         ns.print(`✓ Smart-batcher started on ${bestTarget.name}!`);
         ns.print("");
         ns.print("Basic hacking automation is running");
-        ns.print(`To upgrade to full automation when you have more RAM:`);
-        ns.print(`  run utils/auto-manager.js`);
+        ns.print(`To use full automation suite:`);
+        ns.print(`  kill smart-batcher.js`);
+        ns.print(`  run auto-launcher.js`);
         ns.print("");
         deploymentSuccess = true;
       }
