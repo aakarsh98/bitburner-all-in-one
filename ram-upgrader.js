@@ -25,35 +25,24 @@ export async function main(ns) {
     checkInterval: 30000
   };
   
-  // Check if we have singularity
-  if (!ns.singularity) {
-    ns.print("ℹ️  Singularity API not available");
+  // Check if we have SF4 by looking at owned source files
+  const player = ns.getPlayer();
+  const hasSF4 = player.sourceFiles && player.sourceFiles.some(sf => sf.n === 4);
+  
+  if (!hasSF4) {
+    ns.print("ℹ️  Source-File 4 not available");
     ns.print("This script requires Source-File 4 (The Singularity)");
     ns.print("");
     ns.print("Without SF4, you need to manually upgrade RAM:");
-    ns.print("  1. Check cost with 'singularity' menu");
-    ns.print("  2. Click 'Upgrade Home RAM' when affordable");
-    ns.print("");
-    ns.print("Or complete BitNode 4 to unlock auto-upgrades!");
-    return;
-  }
-  
-  // Test if singularity functions actually work
-  try {
-    const testCost = ns.singularity.getUpgradeHomeRamCost();
-    if (!testCost || testCost === 0) throw new Error("Invalid cost");
-  } catch (e) {
-    ns.print("ℹ️  Singularity functions not accessible");
-    ns.print("This script requires Source-File 4 (The Singularity)");
-    ns.print("");
-    ns.print("Error: " + e.message);
+    ns.print("  1. Open main menu (ESC)");
+    ns.print("  2. Click 'Upgrade Home RAM' when you have money");
     ns.print("");
     ns.print("To get SF4:");
     ns.print("  1. Complete BitNode 4 (The Singularity)");
-    ns.print("  2. After destroying BitNode, you'll get SF4");
+    ns.print("  2. After destroying the BitNode, you'll get SF4");
     ns.print("  3. Then this script will work automatically!");
     ns.print("");
-    ns.print("Until then, manually upgrade RAM from main menu.");
+    ns.print("Exiting - Manual upgrade required.");
     return;
   }
   

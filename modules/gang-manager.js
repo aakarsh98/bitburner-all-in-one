@@ -495,6 +495,27 @@ export class GangManager {
 
 /** Standalone execution for testing */
 export async function main(ns) {
+  ns.disableLog("ALL");
+  
+  // Check if gang is available BEFORE creating manager
+  try {
+    if (!ns.gang || !ns.gang.inGang()) {
+      ns.print("ℹ️  Gang Manager - Not in a gang yet");
+      ns.print("");
+      ns.print("Requirements:");
+      ns.print("  1. Source-File 2 (Gangs)");
+      ns.print("  2. Join a gang from main menu");
+      ns.print("");
+      ns.print("This module will auto-activate when you join a gang.");
+      ns.print("Exiting gracefully...");
+      return;
+    }
+  } catch (e) {
+    ns.print("ℹ️  Gang API not available (need SF2)");
+    ns.print("Complete BitNode 2 to unlock gang features!");
+    return;
+  }
+  
   const manager = new GangManager(ns);
   
   ns.tprint("=== GANG MANAGER TEST ===");
@@ -502,7 +523,7 @@ export async function main(ns) {
   const status = manager.getStatus();
   
   if (!status.available) {
-    ns.tprint("ERROR: Gang not available");
+    ns.tprint("ℹ️  Gang not available");
     ns.tprint("You need Source-File 2 and to join a gang");
     return;
   }

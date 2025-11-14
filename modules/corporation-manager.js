@@ -343,6 +343,27 @@ export class CorporationManager {
 
 /** Standalone execution for testing */
 export async function main(ns) {
+  ns.disableLog("ALL");
+  
+  // Check if corporation is available BEFORE creating manager
+  try {
+    if (!ns.corporation || !ns.corporation.hasCorporation()) {
+      ns.print("ℹ️  Corporation Manager - No corporation yet");
+      ns.print("");
+      ns.print("Requirements:");
+      ns.print("  1. Source-File 3 (Corporations)");
+      ns.print("  2. $150 billion to create corporation");
+      ns.print("");
+      ns.print("This module will auto-activate when you have a corporation.");
+      ns.print("Exiting gracefully...");
+      return;
+    }
+  } catch (e) {
+    ns.print("ℹ️  Corporation API not available (need SF3)");
+    ns.print("Complete BitNode 3 to unlock corporation features!");
+    return;
+  }
+  
   const manager = new CorporationManager(ns);
   
   ns.tprint("=== CORPORATION MANAGER TEST ===");
