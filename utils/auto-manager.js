@@ -930,15 +930,31 @@ export async function main(ns) {
         }
       } else if (module === 'augmentations') {
         if (decision.type === 'purchase') {
-          const success = ns.singularity.purchaseAugmentation(decision.faction, decision.augmentation);
+          const aug = decision.augmentation;
+          const success = ns.singularity.purchaseAugmentation(aug.purchaseFaction, aug.name);
           if (success) {
-            ns.print(`✓ Purchased ${decision.augmentation} from ${decision.faction}`);
+            ns.print(`✓ Purchased ${aug.name} from ${aug.purchaseFaction} ($${(aug.adjustedPrice / 1e6).toFixed(2)}m)`);
             return true;
           }
         } else if (decision.type === 'install') {
-          ns.print(`⚠️ Augmentations ready to install - this will reset!`);
-          ns.print(`  Run: ns.singularity.installAugmentations() when ready`);
-          return false; // Don't auto-install
+          ns.print("═════════════════════════════════════════════════════════");
+          ns.print(`⚠️  AUGMENTATIONS READY TO INSTALL - SOFT RESET!`);
+          ns.print("═════════════════════════════════════════════════════════");
+          ns.print(`${decision.count} augmentations purchased and ready`);
+          ns.print(``);
+          ns.print(`Installing will:`)
+          ns.print(`  - RESET your money, servers, scripts (back them up!)`);
+          ns.print(`  - KEEP your augmentation bonuses (permanent!)`);
+          ns.print(`  - KEEP Source Files from BitNodes`);
+          ns.print(``);
+          ns.print(`To install:`);
+          ns.print(`  1. Backup scripts to GitHub (if not using auto-update)`);
+          ns.print(`  2. Options → Augmentations → Install Augmentations`);
+          ns.print(`  3. After reset: run quick-deploy.js to restore scripts`);
+          ns.print(``);
+          ns.print(`See: docs/Feature Guides/AUGMENTATION_RESET_GUIDE.md`);
+          ns.print("═════════════════════════════════════════════════════════");
+          return false; // NEVER auto-install (safety)
         }
       } else if (module === 'bladeburner') {
         if (decision.type === 'action') {
