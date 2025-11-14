@@ -8,6 +8,23 @@ Date: November 14, 2025
 
 ═════════════════════════════════════════════════════════════════════
 
+⚡ POST-RESET / FRESH GAME? USE THIS INSTEAD! (30 SECONDS)
+
+Just installed augmentations? Starting fresh? This ONE command does it all:
+
+───────────────────────────────────────────────────────────────────
+wget https://raw.githubusercontent.com/aakarsh98/bitburner-all-in-one/main/post-reset.js post-reset.js
+run post-reset.js
+───────────────────────────────────────────────────────────────────
+
+The automated recovery script:
+✓ Downloads all scripts
+✓ Finds best target
+✓ Deploys automation
+✓ Starts making money in 1-2 minutes!
+
+═════════════════════════════════════════════════════════════════════
+
 🚀 METHOD 1: SUPER QUICK INSTALL (RECOMMENDED - 1 MINUTE)
 
 Copy this entire script into Bitburner and run it:

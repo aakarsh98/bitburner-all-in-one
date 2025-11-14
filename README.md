@@ -117,6 +117,25 @@ Most features work from the start! Advanced modules unlock as you progress:
 
 ---
 
+## ⚡ Post-Reset / Fresh Game Quick Start
+
+**Just installed augmentations? Starting a new game?** Use this ONE command:
+
+```bash
+wget https://raw.githubusercontent.com/aakarsh98/bitburner-all-in-one/main/post-reset.js post-reset.js
+run post-reset.js
+```
+
+**This automated recovery script:**
+- ✅ Downloads all scripts automatically
+- ✅ Finds your best starter target
+- ✅ Deploys optimal automation
+- ✅ Starts making money immediately (1-2 minutes total!)
+
+**Perfect for:** Post-augmentation reset, fresh game start, quick recovery
+
+---
+
 ## 🔧 Installation First!
 
 Before running any commands, you need to download the scripts:

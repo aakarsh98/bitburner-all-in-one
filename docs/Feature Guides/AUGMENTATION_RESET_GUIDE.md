@@ -193,6 +193,28 @@ const tracker = new AugmentationTracker(ns, {
 
 After installing augmentations:
 
+### 🚀 FASTEST METHOD (Automated - 1 minute):
+
+**Copy-paste this ONE command:**
+```bash
+wget https://raw.githubusercontent.com/aakarsh98/bitburner-all-in-one/main/post-reset.js post-reset.js
+run post-reset.js
+```
+
+**This automated script:**
+1. ✅ Downloads all scripts automatically
+2. ✅ Analyzes your current situation
+3. ✅ Finds the best starter target
+4. ✅ Deploys optimal automation (auto-manager or smart-batcher)
+5. ✅ Provides personalized recommendations
+6. ✅ Starts making money immediately
+
+**That's it! Everything else is automatic.**
+
+---
+
+### 📋 Manual Method (If automated fails):
+
 ### Immediate (First 5 minutes):
 1. ✅ **Re-download scripts**
    ```bash
