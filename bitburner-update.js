@@ -47,7 +47,9 @@ export async function main(ns) {
       { file: "dashboard.js", folder: folders.root },
       { file: "ram-upgrader.js", folder: folders.root },
       { file: "go4.js", folder: folders.root },
-      { file: "hacknet-farm-manager.js", folder: folders.root }
+      { file: "hacknet-farm-manager.js", folder: folders.root },
+      { file: "bitnode-progression.js", folder: folders.root },
+      { file: "sf4-roadmap.js", folder: folders.root }
     ],
     
     batch: [
@@ -96,9 +98,15 @@ export async function main(ns) {
       { file: "augmentation-tracker.js", folder: folders.modules },
       { file: "company-automator.js", folder: folders.modules },
       { file: "bladeburner-commander.js", folder: folders.modules },
+      { file: "bladeburner-automation.js", folder: folders.modules },
       { file: "gang-manager.js", folder: folders.modules },
+      { file: "gang-runner.js", folder: folders.modules },
       { file: "corporation-manager.js", folder: folders.modules },
-      { file: "go-commander.js", folder: folders.modules }
+      { file: "go-commander.js", folder: folders.modules },
+      { file: "program-buyer.js", folder: folders.modules },
+      { file: "faction-worker.js", folder: folders.modules },
+      { file: "stock-trader.js", folder: folders.modules },
+      { file: "server-scanner.js", folder: folders.modules }
     ]
   };
 
