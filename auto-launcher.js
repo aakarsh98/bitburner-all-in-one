@@ -68,7 +68,32 @@ export async function main(ns) {
         displayName: "Hacknet Farm"
       },
       
+      serverScanner: {
+        script: "modules/server-scanner.js",
+        args: [],
+        threads: 1,
+        enabled: true,
+        displayName: "Server Scanner (Auto-Nuke)"
+      },
+      
       // SF4 modules (Singularity)
+      programBuyer: {
+        script: "modules/program-buyer.js",
+        args: [],
+        threads: 1,
+        requireAPI: "singularity",
+        displayName: "Program Buyer (SF4)"
+      },
+      
+      factionWorker: {
+        script: "modules/faction-worker.js",
+        args: [],
+        threads: 1,
+        requireAPI: "singularity",
+        displayName: "Faction Worker (SF4)",
+        enabled: false  // Disabled by default, enable manually if needed
+      },
+      
       factionManager: {
         script: "modules/faction-manager.js",
         args: [],
@@ -94,12 +119,21 @@ export async function main(ns) {
       },
       
       // SF6/SF7 module (Bladeburner)
+      bladeburnerAutomation: {
+        script: "modules/bladeburner-automation.js",
+        args: [],
+        threads: 1,
+        requireAPI: "bladeburner",
+        displayName: "Bladeburner Automation (SF6/SF7)"
+      },
+      
       bladeburnerCommander: {
         script: "modules/bladeburner-commander.js",
         args: [],
         threads: 1,
         requireAPI: "bladeburner",
-        displayName: "Bladeburner Commander (SF6/SF7)"
+        displayName: "Bladeburner Commander (SF6/SF7)",
+        enabled: false  // Use automation instead
       },
       
       // SF2 module (Gang)
@@ -118,6 +152,15 @@ export async function main(ns) {
         threads: 1,
         requireAPI: "corporation",
         displayName: "Corporation Manager (SF3)"
+      },
+      
+      // SF8 module (Stock Market)
+      stockTrader: {
+        script: "modules/stock-trader.js",
+        args: [],
+        threads: 1,
+        requireAPI: "stock",
+        displayName: "Stock Trader (SF8)"
       },
       
       // Go game (if unlocked)
@@ -150,6 +193,8 @@ export async function main(ns) {
           return ns.gang !== undefined;  // Just check API exists, module will check if in gang
         case "corporation":
           return ns.corporation !== undefined;  // Just check API exists, module will check if has corp
+        case "stock":
+          return ns.stock !== undefined;  // Just check API exists, module will check if has access
         case "go":
           return ns.go !== undefined;
         default:
