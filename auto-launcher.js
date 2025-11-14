@@ -385,6 +385,8 @@ export async function main(ns) {
   if (CONFIG.ramUpgrade.enabled && failedModules.length > 0) {
     ns.print("💰 Will auto-upgrade RAM to launch failed modules");
   }
+  ns.print("");
+  ns.print("💡 Pro Tip: Run 'dashboard.js' for real-time monitoring!");
   ns.print("═════════════════════════════════════════════════════════");
   ns.print("");
   

@@ -110,6 +110,26 @@ The auto-launcher:
 
 **No further intervention needed!** As you complete BitNodes and unlock new Source Files, the modules automatically activate on next restart.
 
+### Real-Time Monitoring
+
+Want to see everything that's happening? Run the **comprehensive dashboard**:
+
+```bash
+run dashboard.js
+```
+
+**The dashboard shows:**
+- 💰 Financial metrics (income, projections, balance)
+- 🖥️ System resources (RAM usage, network stats)
+- 🤖 Active modules status
+- 👤 Player stats and progression
+- 🏛️ Faction progress (if SF4+)
+- 🌐 Hacknet performance
+- 🔔 Alerts and notifications
+- 💡 Strategic recommendations
+
+**Updates every 2 seconds** with real-time KPIs and actionable insights!
+
 ### Module Requirements
 
 Most features work from the start! Advanced modules unlock as you progress:
