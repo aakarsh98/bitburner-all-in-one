@@ -41,6 +41,8 @@ export async function main(ns) {
       { file: "production-monitor.js", folder: folders.analysis },
       { file: "estimate-production.js", folder: folders.analysis },
       { file: "auto-manager.js", folder: folders.utils },
+      { file: "auto-launcher.js", folder: folders.root },
+      { file: "post-reset.js", folder: folders.root },
       { file: "go4.js", folder: folders.root },
       { file: "hacknet-farm-manager.js", folder: folders.root }
     ],

@@ -29,6 +29,15 @@ export async function main(ns) {
     checkInterval: 60000,  // Check every 60 seconds
     restartDelay: 5000,    // Wait 5 seconds before restarting crashed module
     
+    // RAM upgrade settings
+    ramUpgrade: {
+      enabled: true,          // Auto-upgrade home RAM
+      priority: true,         // Prioritize RAM upgrades over other purchases
+      targetRAM: 1024,        // Ultimate goal: 1TB (will auto-stop when reached)
+      minMoneyReserve: 1000000, // Keep at least $1m after purchase
+      checkInterval: 30000    // Check for upgrades every 30 seconds
+    },
+    
     // Module definitions
     modules: {
       // Core automation (always runs)
@@ -183,6 +192,86 @@ export async function main(ns) {
     return `${seconds}s`;
   }
   
+  // Helper: Format money
+  function formatMoney(num) {
+    if (num >= 1e12) return `$${(num / 1e12).toFixed(2)}t`;
+    if (num >= 1e9) return `$${(num / 1e9).toFixed(2)}b`;
+    if (num >= 1e6) return `$${(num / 1e6).toFixed(2)}m`;
+    if (num >= 1e3) return `$${(num / 1e3).toFixed(2)}k`;
+    return `$${num.toFixed(2)}`;
+  }
+  
+  // Helper: Check if we should upgrade home RAM
+  function shouldUpgradeRAM() {
+    if (!CONFIG.ramUpgrade.enabled) return false;
+    
+    const currentRAM = ns.getServerMaxRam("home");
+    if (currentRAM >= CONFIG.ramUpgrade.targetRAM) return false;
+    
+    const upgradeCost = ns.singularity?.getUpgradeHomeRamCost?.();
+    if (!upgradeCost) return false; // No singularity access
+    
+    const currentMoney = ns.getPlayer().money;
+    const afterPurchase = currentMoney - upgradeCost;
+    
+    return afterPurchase >= CONFIG.ramUpgrade.minMoneyReserve;
+  }
+  
+  // Helper: Upgrade home RAM
+  async function upgradeHomeRAM() {
+    const currentRAM = ns.getServerMaxRam("home");
+    const upgradeCost = ns.singularity?.getUpgradeHomeRamCost?.();
+    
+    if (!upgradeCost) return false;
+    
+    ns.print("");
+    ns.print("═════════════════════════════════════════════════════════");
+    ns.print("💰 UPGRADING HOME RAM!");
+    ns.print("═════════════════════════════════════════════════════════");
+    ns.print(`Current RAM: ${currentRAM}GB → ${currentRAM * 2}GB`);
+    ns.print(`Cost: ${formatMoney(upgradeCost)}`);
+    
+    const success = ns.singularity.upgradeHomeRam();
+    
+    if (success) {
+      ns.print("✓ RAM upgraded successfully!");
+      ns.print("");
+      ns.print("Attempting to launch failed modules with new RAM...");
+      ns.print("═════════════════════════════════════════════════════════");
+      ns.print("");
+      
+      return true;
+    } else {
+      ns.print("✗ RAM upgrade failed!");
+      ns.print("═════════════════════════════════════════════════════════");
+      ns.print("");
+      return false;
+    }
+  }
+  
+  // Helper: Try to launch failed modules
+  async function launchFailedModules(availableAPIs, failedModules) {
+    let newlyStarted = 0;
+    
+    for (const moduleKey of failedModules) {
+      const moduleConfig = CONFIG.modules[moduleKey];
+      
+      // Check if still should skip
+      if (moduleConfig.enabled === false) continue;
+      if (!scriptExists(moduleConfig.script)) continue;
+      if (moduleConfig.requireAPI && !availableAPIs[moduleConfig.requireAPI]) continue;
+      
+      // Try to launch
+      if (launchModule(moduleKey, moduleConfig)) {
+        newlyStarted++;
+        crashCount.set(moduleKey, 0);
+        await ns.sleep(500);
+      }
+    }
+    
+    return newlyStarted;
+  }
+  
   // Initial startup
   ns.print("═════════════════════════════════════════════════════════");
   ns.print("🚀 AUTO-LAUNCHER - One Command, Full Automation");
@@ -220,6 +309,7 @@ export async function main(ns) {
   let startedCount = 0;
   let skippedCount = 0;
   const skippedModules = [];
+  const failedModules = []; // Track modules that failed to start (likely due to RAM)
   
   for (const [moduleKey, moduleConfig] of Object.entries(CONFIG.modules)) {
     // Check if explicitly disabled
@@ -250,6 +340,7 @@ export async function main(ns) {
     } else {
       skippedCount++;
       skippedModules.push(`${moduleConfig.displayName} (start failed)`);
+      failedModules.push(moduleKey); // Track for later retry
     }
     
     // Small delay between launches
@@ -264,13 +355,42 @@ export async function main(ns) {
       ns.print(`  • ${skipped}`);
     }
   }
+  
+  // Show RAM upgrade status
+  if (CONFIG.ramUpgrade.enabled && availableAPIs.singularity) {
+    const currentRAM = ns.getServerMaxRam("home");
+    const usedRAM = ns.getServerUsedRam("home");
+    const freeRAM = currentRAM - usedRAM;
+    const upgradeCost = ns.singularity.getUpgradeHomeRamCost();
+    
+    ns.print("");
+    ns.print("RAM Status:");
+    ns.print(`  Current: ${currentRAM}GB (${freeRAM.toFixed(1)}GB free)`);
+    
+    if (failedModules.length > 0) {
+      ns.print(`  ⚠️  ${failedModules.length} modules failed (likely insufficient RAM)`);
+      ns.print(`  Next upgrade: ${currentRAM}GB → ${currentRAM * 2}GB (${formatMoney(upgradeCost)})`);
+      ns.print(`  💰 Auto-upgrade enabled! Will upgrade when affordable.`);
+    } else if (currentRAM < CONFIG.ramUpgrade.targetRAM) {
+      ns.print(`  Next upgrade: ${currentRAM}GB → ${currentRAM * 2}GB (${formatMoney(upgradeCost)})`);
+      ns.print(`  💰 Auto-upgrade enabled!`);
+    } else {
+      ns.print(`  ✓ Target RAM reached (${CONFIG.ramUpgrade.targetRAM}GB)`);
+    }
+  }
+  
   ns.print("");
   ns.print("═════════════════════════════════════════════════════════");
   ns.print("✅ All automation launched! Monitoring for crashes...");
+  if (CONFIG.ramUpgrade.enabled && failedModules.length > 0) {
+    ns.print("💰 Will auto-upgrade RAM to launch failed modules");
+  }
   ns.print("═════════════════════════════════════════════════════════");
   ns.print("");
   
   // Main monitoring loop
+  let lastRAMCheck = Date.now();
+  
   while (true) {
     await ns.sleep(CONFIG.checkInterval);
     
@@ -304,11 +424,76 @@ export async function main(ns) {
       }
     }
     
+    // Check if we should upgrade RAM
+    const now = Date.now();
+    if (CONFIG.ramUpgrade.enabled && 
+        failedModules.length > 0 && 
+        now - lastRAMCheck >= CONFIG.ramUpgrade.checkInterval) {
+      
+      lastRAMCheck = now;
+      
+      if (shouldUpgradeRAM()) {
+        const upgraded = await upgradeHomeRAM();
+        
+        if (upgraded) {
+          // Try to launch failed modules with new RAM
+          const newlyStarted = await launchFailedModules(availableAPIs, failedModules);
+          
+          if (newlyStarted > 0) {
+            ns.print(`✓ Successfully started ${newlyStarted} additional modules!`);
+            
+            // Remove successfully started modules from failed list
+            const stillFailed = [];
+            for (const moduleKey of failedModules) {
+              if (!runningProcesses.has(moduleKey)) {
+                stillFailed.push(moduleKey);
+              }
+            }
+            failedModules.length = 0;
+            failedModules.push(...stillFailed);
+            
+            if (failedModules.length === 0) {
+              ns.print("🎉 All modules now running!");
+            } else {
+              ns.print(`⚠️  ${failedModules.length} modules still need more RAM`);
+            }
+          } else {
+            ns.print("⚠️  Still not enough RAM for remaining modules");
+          }
+          ns.print("");
+        }
+      }
+    }
+    
     // Periodic status update
     if (runningProcesses.size > 0) {
       ns.print("─────────────────────────────────────────────────────────");
       ns.print(`Status Update - ${new Date().toLocaleTimeString()}`);
       ns.print("─────────────────────────────────────────────────────────");
+      
+      // Show RAM info
+      const currentRAM = ns.getServerMaxRam("home");
+      const usedRAM = ns.getServerUsedRam("home");
+      const freeRAM = currentRAM - usedRAM;
+      ns.print(`RAM: ${usedRAM.toFixed(1)}GB / ${currentRAM}GB (${freeRAM.toFixed(1)}GB free)`);
+      
+      // Show module status
+      ns.print(`Running: ${runningProcesses.size} modules`);
+      if (failedModules.length > 0) {
+        ns.print(`Waiting for RAM: ${failedModules.length} modules`);
+        
+        if (CONFIG.ramUpgrade.enabled && availableAPIs.singularity) {
+          const upgradeCost = ns.singularity.getUpgradeHomeRamCost();
+          const currentMoney = ns.getPlayer().money;
+          if (currentMoney >= upgradeCost + CONFIG.ramUpgrade.minMoneyReserve) {
+            ns.print(`💰 Upgrading RAM soon... (${formatMoney(upgradeCost)})`);
+          } else {
+            const needed = upgradeCost + CONFIG.ramUpgrade.minMoneyReserve - currentMoney;
+            ns.print(`💰 Saving for RAM upgrade (need ${formatMoney(needed)} more)`);
+          }
+        }
+      }
+      ns.print("");
       
       for (const [moduleKey, processInfo] of runningProcesses.entries()) {
         const uptime = Date.now() - processInfo.startTime;
