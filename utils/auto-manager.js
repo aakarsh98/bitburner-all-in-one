@@ -1,27 +1,32 @@
 /** auto-manager.js
  * Complete All-in-One Automation System for Bitburner
  * 
- * INTEGRATED MODULES:
- * - Hacking: Automated target analysis and smart-batcher deployment
- * - Servers: Automated server purchasing and upgrading with ROI analysis
- * - Hacknet: Automated hacknet node management and optimization
- * - Factions: Intelligent faction joining and reputation farming
- * - Augmentations: Optimal augmentation purchase planning
- * - Companies: Automated company work and promotions
- * - Bladeburner: Automated operations and skill management
- * - Gangs: Automated gang management and ascension
- * - Corporations: Basic corporation tracking and recommendations
+ * RAM USAGE: Uses dynamic imports - only loads enabled modules!
+ * - Base system: ~6-8GB (hacking + servers + hacknet)
+ * - Each additional module: +2-4GB when enabled
+ * - Modules auto-detect if APIs are available (SF4, SF6, etc.)
+ * 
+ * INTEGRATED MODULES (loaded on-demand):
+ * - Hacking: Automated target analysis and smart-batcher deployment (always enabled)
+ * - Servers: Automated server purchasing and upgrading with ROI analysis (always enabled)
+ * - Hacknet: Automated hacknet node management and optimization (always enabled)
+ * - Factions: Intelligent faction joining and reputation farming (needs SF4)
+ * - Augmentations: Optimal augmentation purchase planning (needs SF4)
+ * - Companies: Automated company work and promotions (needs SF4)
+ * - Bladeburner: Automated operations and skill management (needs SF6/SF7)
+ * - Gangs: Automated gang management and ascension (needs SF2)
+ * - Corporations: Basic corporation tracking and recommendations (needs SF3)
  * - Go: Automated Go game playing with advanced 5-stage strategy
  * 
  * Usage:
- *   run auto-manager.js                           # Full automation with safe defaults
+ *   run auto-manager.js                           # Core automation (hacking/servers/hacknet)
  *   run auto-manager.js --aggressive              # More aggressive investing
  *   run auto-manager.js --conservative            # Higher safety reserves
  *   run auto-manager.js --analyze-only            # Analysis and suggestions only
  *   run auto-manager.js --deployment-only         # Skip server purchasing
  *   run auto-manager.js --monitor                 # Show current status
  * 
- * Module Control:
+ * Module Control (modules only load if enabled AND API available):
  *   run auto-manager.js --no-factions             # Disable faction automation
  *   run auto-manager.js --no-companies            # Disable company automation
  *   run auto-manager.js --no-bladeburner          # Disable Bladeburner automation
@@ -31,15 +36,6 @@
  * Advanced options:
  *   run auto-manager.js --max-servers 15 --roi-hours 1.5 --reserve-fund 2000000
  */
-
-// Import all automation modules
-import { FactionManager } from '../modules/faction-manager.js';
-import { AugmentationTracker } from '../modules/augmentation-tracker.js';
-import { CompanyAutomator } from '../modules/company-automator.js';
-import { BladeburnerCommander } from '../modules/bladeburner-commander.js';
-import { GangManager } from '../modules/gang-manager.js';
-import { CorporationManager } from '../modules/corporation-manager.js';
-import { GoCommander } from '../modules/go-commander.js';
 
 /** @param {NS} ns */
 export async function main(ns) {
@@ -147,16 +143,72 @@ export async function main(ns) {
     modules: { ...CONFIG.modules, ...args.modules }
   };
   
-  // Initialize all automation modules
-  const modules = {
-    factions: config.modules.factions ? new FactionManager(ns) : null,
-    augmentations: config.modules.augmentations ? new AugmentationTracker(ns) : null,
-    companies: config.modules.companies ? new CompanyAutomator(ns) : null,
-    bladeburner: config.modules.bladeburner ? new BladeburnerCommander(ns) : null,
-    gangs: config.modules.gangs ? new GangManager(ns) : null,
-    corporations: config.modules.corporations ? new CorporationManager(ns) : null,
-    go: config.modules.go ? new GoCommander(ns) : null
-  };
+  // Initialize all automation modules using dynamic imports
+  // This reduces RAM cost - only loads modules that are enabled
+  async function loadModules() {
+    const loadedModules = {
+      factions: null,
+      augmentations: null,
+      companies: null,
+      bladeburner: null,
+      gangs: null,
+      corporations: null,
+      go: null
+    };
+    
+    try {
+      if (config.modules.factions) {
+        const { FactionManager } = await import('../modules/faction-manager.js');
+        loadedModules.factions = new FactionManager(ns);
+      }
+    } catch (e) { ns.print(`⚠️ Could not load faction-manager: ${e}`); }
+    
+    try {
+      if (config.modules.augmentations) {
+        const { AugmentationTracker } = await import('../modules/augmentation-tracker.js');
+        loadedModules.augmentations = new AugmentationTracker(ns);
+      }
+    } catch (e) { ns.print(`⚠️ Could not load augmentation-tracker: ${e}`); }
+    
+    try {
+      if (config.modules.companies) {
+        const { CompanyAutomator } = await import('../modules/company-automator.js');
+        loadedModules.companies = new CompanyAutomator(ns);
+      }
+    } catch (e) { ns.print(`⚠️ Could not load company-automator: ${e}`); }
+    
+    try {
+      if (config.modules.bladeburner) {
+        const { BladeburnerCommander } = await import('../modules/bladeburner-commander.js');
+        loadedModules.bladeburner = new BladeburnerCommander(ns);
+      }
+    } catch (e) { ns.print(`⚠️ Could not load bladeburner-commander: ${e}`); }
+    
+    try {
+      if (config.modules.gangs) {
+        const { GangManager } = await import('../modules/gang-manager.js');
+        loadedModules.gangs = new GangManager(ns);
+      }
+    } catch (e) { ns.print(`⚠️ Could not load gang-manager: ${e}`); }
+    
+    try {
+      if (config.modules.corporations) {
+        const { CorporationManager } = await import('../modules/corporation-manager.js');
+        loadedModules.corporations = new CorporationManager(ns);
+      }
+    } catch (e) { ns.print(`⚠️ Could not load corporation-manager: ${e}`); }
+    
+    try {
+      if (config.modules.go) {
+        const { GoCommander } = await import('../modules/go-commander.js');
+        loadedModules.go = new GoCommander(ns);
+      }
+    } catch (e) { ns.print(`⚠️ Could not load go-commander: ${e}`); }
+    
+    return loadedModules;
+  }
+  
+  const modules = await loadModules();
 
   // ===== HELPER FUNCTIONS =====
   
