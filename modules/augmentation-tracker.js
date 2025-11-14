@@ -419,15 +419,26 @@ export class AugmentationTracker {
 
 /** Standalone execution for testing */
 export async function main(ns) {
+  ns.disableLog("ALL");
+  
+  const player = ns.getPlayer();
+  const hasSF4 = player.sourceFiles && player.sourceFiles.some(sf => sf.n === 4);
+  
+  if (!hasSF4) {
+    ns.print("ℹ️  Source-File 4 not available");
+    ns.print("This module requires SF4 (The Singularity)");
+    ns.print("");
+    ns.print("Once you get SF4, this will track:");
+    ns.print("  • Available augmentations from factions");
+    ns.print("  • Best augmentations to purchase");
+    ns.print("  • Cost and reputation requirements");
+    ns.print("  • Auto-purchase recommendations");
+    return;
+  }
+  
   const tracker = new AugmentationTracker(ns);
   
   ns.tprint("=== AUGMENTATION TRACKER TEST ===");
-  
-  if (!tracker.hasSingularityAccess()) {
-    ns.tprint("ERROR: Singularity API not available");
-    ns.tprint("You need Source-File 4 (Singularity) to use this module");
-    return;
-  }
   
   const status = tracker.getStatus();
   ns.tprint(`\nOwned: ${status.ownedCount} | Installed: ${status.installedCount} | Pending: ${status.pendingCount}`);

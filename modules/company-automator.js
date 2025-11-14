@@ -469,15 +469,26 @@ export class CompanyAutomator {
 
 /** Standalone execution for testing */
 export async function main(ns) {
+  ns.disableLog("ALL");
+  
+  const player = ns.getPlayer();
+  const hasSF4 = player.sourceFiles && player.sourceFiles.some(sf => sf.n === 4);
+  
+  if (!hasSF4) {
+    ns.print("ℹ️  Source-File 4 not available");
+    ns.print("This module requires SF4 (The Singularity)");
+    ns.print("");
+    ns.print("Once you get SF4, this will manage:");
+    ns.print("  • Auto-apply to best companies");
+    ns.print("  • Work optimal job types");
+    ns.print("  • Auto-apply for promotions");
+    ns.print("  • Optimize income and reputation");
+    return;
+  }
+  
   const automator = new CompanyAutomator(ns);
   
   ns.tprint("=== COMPANY AUTOMATOR TEST ===");
-  
-  if (!automator.hasSingularityAccess()) {
-    ns.tprint("ERROR: Singularity API not available");
-    ns.tprint("You need Source-File 4 (Singularity) to use this module");
-    return;
-  }
   
   const status = automator.getStatus();
   ns.tprint(`\nEmployed at: ${status.employedAt} companies`);

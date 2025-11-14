@@ -333,6 +333,23 @@ export class FactionManager {
 
 /** Standalone execution for testing */
 export async function main(ns) {
+  ns.disableLog("ALL");
+  
+  const player = ns.getPlayer();
+  const hasSF4 = player.sourceFiles && player.sourceFiles.some(sf => sf.n === 4);
+  
+  if (!hasSF4) {
+    ns.print("ℹ️  Source-File 4 not available");
+    ns.print("This module requires SF4 (The Singularity)");
+    ns.print("");
+    ns.print("Once you get SF4, this will manage:");
+    ns.print("  • Auto-join best factions");
+    ns.print("  • Farm faction reputation");
+    ns.print("  • Optimize work type");
+    ns.print("  • Track augmentation goals");
+    return;
+  }
+  
   const manager = new FactionManager(ns);
   
   ns.print("=== FACTION MANAGER TEST ===");
