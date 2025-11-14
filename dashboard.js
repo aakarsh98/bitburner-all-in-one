@@ -76,6 +76,9 @@ export async function main(ns) {
     const player = ns.getPlayer();
     const currentMoney = player.money;
     
+    // Check if we have SF4
+    const hasSF4 = player.sourceFiles && player.sourceFiles.some(sf => sf.n === 4);
+    
     // Calculate income rate
     const timeDiff = (now - lastUpdate) / 1000; // seconds
     const moneyDiff = currentMoney - lastMoney;
@@ -213,7 +216,7 @@ export async function main(ns) {
     // ═══════════════════════════════════════════════════════════════════════════
     // FACTION PROGRESS (if SF4)
     // ═══════════════════════════════════════════════════════════════════════════
-    if (ns.singularity) {
+    if (hasSF4) {
       ns.print("┌─────────────────────────────────────────────────────────────────────────┐");
       ns.print("│ 🏛️  FACTION PROGRESS                                                     │");
       ns.print("├─────────────────────────────────────────────────────────────────────────┤");
@@ -271,7 +274,7 @@ export async function main(ns) {
     if (incomePerSec < 1000 && currentMoney > 1000000) alerts.push("💡 Low income rate - check automation");
     
     // Check for opportunities
-    if (ns.singularity) {
+    if (hasSF4) {
       const upgradeCost = ns.singularity.getUpgradeHomeRamCost();
       if (currentMoney > upgradeCost * 2) {
         alerts.push(`💰 Can afford RAM upgrade! (${fmt(upgradeCost)})`);
