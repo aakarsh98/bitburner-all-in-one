@@ -42,6 +42,7 @@ export async function main(ns) {
       { file: "estimate-production.js", folder: folders.analysis },
       { file: "auto-manager.js", folder: folders.utils },
       { file: "auto-launcher.js", folder: folders.root },
+      { file: "smart-orchestrator.js", folder: folders.root },
       { file: "post-reset.js", folder: folders.root },
       { file: "quick-update.js", folder: folders.root },
       { file: "dashboard.js", folder: folders.root },
