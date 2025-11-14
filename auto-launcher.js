@@ -133,6 +133,8 @@ export async function main(ns) {
   const MAX_CRASHES = 3;
   
   // Helper: Check if API is available
+  // NOTE: We only check if API exists, not if player is using it
+  // The modules themselves will handle checking if player is in gang/has corp/etc
   function checkAPI(apiName) {
     try {
       switch (apiName) {
@@ -141,9 +143,9 @@ export async function main(ns) {
         case "bladeburner":
           return ns.bladeburner !== undefined;
         case "gang":
-          return ns.gang !== undefined && ns.gang.inGang();
+          return ns.gang !== undefined;  // Just check API exists, module will check if in gang
         case "corporation":
-          return ns.corporation !== undefined && ns.corporation.hasCorporation();
+          return ns.corporation !== undefined;  // Just check API exists, module will check if has corp
         case "go":
           return ns.go !== undefined;
         default:
