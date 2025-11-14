@@ -45,12 +45,19 @@ export async function main(ns) {
     // Module definitions
     modules: {
       // Core automation (always runs)
+      // Note: batch-manager is heavy (~6GB), smart-batcher is lighter (~2-3GB)
       batchManager: {
         script: "batch/batch-manager.js",
         args: [],
         threads: 1,
         enabled: true,
-        displayName: "Batch Manager (Core)"
+        displayName: "Batch Manager (Core)",
+        minRAM: 16,  // Needs 16GB+ home to run batch-manager
+        fallback: {
+          script: "batch/smart-batcher.js",
+          args: ["joesguns", 0.05],  // target, hack 5%
+          displayName: "Smart Batcher"
+        }
       },
       
       hacknetManager: {
@@ -161,19 +168,32 @@ export async function main(ns) {
   // Helper: Launch a module
   function launchModule(moduleKey, moduleConfig) {
     try {
-      const pid = ns.run(moduleConfig.script, moduleConfig.threads, ...moduleConfig.args);
+      // Check if we should use fallback due to low RAM
+      const homeRAM = ns.getServerMaxRam("home");
+      let scriptToRun = moduleConfig.script;
+      let argsToUse = moduleConfig.args;
+      let displayName = moduleConfig.displayName;
+      
+      if (moduleConfig.minRAM && homeRAM < moduleConfig.minRAM && moduleConfig.fallback) {
+        ns.print(`ℹ️  Home RAM (${homeRAM}GB) < ${moduleConfig.minRAM}GB, using fallback...`);
+        scriptToRun = moduleConfig.fallback.script;
+        argsToUse = moduleConfig.fallback.args;
+        displayName = moduleConfig.fallback.displayName;
+      }
+      
+      const pid = ns.run(scriptToRun, moduleConfig.threads, ...argsToUse);
       
       if (pid > 0) {
         runningProcesses.set(moduleKey, {
           pid: pid,
-          script: moduleConfig.script,
-          displayName: moduleConfig.displayName,
+          script: scriptToRun,
+          displayName: displayName,
           startTime: Date.now()
         });
-        ns.print(`✓ Started: ${moduleConfig.displayName}`);
+        ns.print(`✓ Started: ${displayName}`);
         return true;
       } else {
-        ns.print(`✗ Failed to start: ${moduleConfig.displayName} (no RAM?)`);
+        ns.print(`✗ Failed to start: ${displayName} (no RAM?)`);
         return false;
       }
     } catch (e) {
@@ -339,9 +359,9 @@ export async function main(ns) {
   ns.print("═════════════════════════════════════════════════════════");
   ns.print("");
   
-  // Launch dashboard automatically
+  // Launch dashboard automatically (skip on very low RAM)
   let dashboardPID = 0;
-  if (CONFIG.dashboard.enabled && scriptExists(CONFIG.dashboard.script)) {
+  if (currentRAM >= 16 && CONFIG.dashboard.enabled && scriptExists(CONFIG.dashboard.script)) {
     ns.print("📊 Launching real-time dashboard...");
     try {
       dashboardPID = ns.run(CONFIG.dashboard.script, 1, `--refresh`, CONFIG.dashboard.refreshRate);
@@ -353,11 +373,14 @@ export async function main(ns) {
     } catch (e) {
       ns.print(`⚠️  Dashboard error: ${e}`);
     }
+  } else if (currentRAM < 16) {
+    ns.print("ℹ️  Dashboard disabled (need 16GB+ RAM)");
+    ns.print("   Upgrade home RAM for real-time monitoring");
   }
   
-  // Launch RAM upgrader automatically (if SF4 available)
+  // Launch RAM upgrader automatically (if SF4 available, skip on very low RAM)
   let ramUpgraderPID = 0;
-  if (CONFIG.ramUpgrader.enabled && availableAPIs.singularity && scriptExists(CONFIG.ramUpgrader.script)) {
+  if (currentRAM >= 16 && CONFIG.ramUpgrader.enabled && availableAPIs.singularity && scriptExists(CONFIG.ramUpgrader.script)) {
     ns.print("💰 Launching RAM upgrader...");
     try {
       ramUpgraderPID = ns.run(CONFIG.ramUpgrader.script, 1);
@@ -372,6 +395,9 @@ export async function main(ns) {
     } catch (e) {
       ns.print(`⚠️  RAM upgrader error: ${e}`);
     }
+  } else if (currentRAM < 16 && availableAPIs.singularity) {
+    ns.print("ℹ️  RAM upgrader disabled (need 16GB+ RAM)");
+    ns.print("   Manually upgrade: run ram-upgrader.js");
   }
   
   ns.print("");
