@@ -397,7 +397,11 @@ export async function main(ns) {
     }
   } else if (currentRAM < 16 && availableAPIs.singularity) {
     ns.print("ℹ️  RAM upgrader disabled (need 16GB+ RAM)");
-    ns.print("   Manually upgrade: run ram-upgrader.js");
+    ns.print("   Manually upgrade RAM then restart auto-launcher");
+  } else if (!availableAPIs.singularity && currentRAM >= 16) {
+    ns.print("ℹ️  RAM upgrader disabled (need SF4)");
+    ns.print("   Manually upgrade RAM from main menu");
+    ns.print("   Or complete BitNode 4 for auto-upgrades!");
   }
   
   ns.print("");
