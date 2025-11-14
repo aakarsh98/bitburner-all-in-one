@@ -195,30 +195,29 @@ export async function main(ns) {
   
   let deploymentSuccess = false;
   
-  // Try auto-manager first (if enough RAM)
+  // Try batch-manager first (best option - auto-scales)
   if (homeRAM >= 8) {
-    ns.print(`Attempting to start auto-manager (uses ~6-8GB)...`);
+    ns.print(`Starting batch-manager (intelligent automation)...`);
     
     try {
-      const pid = ns.run("utils/auto-manager.js", 1);
+      const pid = ns.run("batch/batch-manager.js", 1, bestTarget.name, "--quiet");
       
       if (pid > 0) {
-        ns.print("✓ Auto-manager started!");
+        ns.print("✓ Batch-manager started!");
         ns.print("");
-        ns.print("The all-in-one system is now running:");
-        ns.print("  • Automatically finds best targets");
-        ns.print("  • Deploys smart-batcher");
-        ns.print("  • Manages servers & hacknet");
-        ns.print("  • Scales as you progress");
+        ns.print("Intelligent automation is running:");
+        ns.print("  • Auto-targets best servers");
+        ns.print("  • Detects RAM upgrades automatically");
+        ns.print("  • Scales as you grow");
         ns.print("");
         deploymentSuccess = true;
       }
     } catch (e) {
-      ns.print(`⚠️  Auto-manager failed: ${e}`);
+      ns.print(`⚠️  Batch-manager failed: ${e}`);
     }
   }
   
-  // Fallback to smart-batcher if auto-manager didn't work
+  // Fallback to smart-batcher if batch-manager didn't work
   if (!deploymentSuccess && homeRAM >= 5) {
     ns.print(`Starting smart-batcher directly...`);
     
