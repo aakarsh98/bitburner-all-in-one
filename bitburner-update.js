@@ -44,6 +44,7 @@ export async function main(ns) {
       { file: "auto-launcher.js", folder: folders.root },
       { file: "post-reset.js", folder: folders.root },
       { file: "dashboard.js", folder: folders.root },
+      { file: "ram-upgrader.js", folder: folders.root },
       { file: "go4.js", folder: folders.root },
       { file: "hacknet-farm-manager.js", folder: folders.root }
     ],

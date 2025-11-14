@@ -36,13 +36,10 @@ export async function main(ns) {
       refreshRate: 2000      // Dashboard refresh rate (ms)
     },
     
-    // RAM upgrade settings
-    ramUpgrade: {
-      enabled: true,          // Auto-upgrade home RAM
-      priority: true,         // Prioritize RAM upgrades over other purchases
-      targetRAM: 1024,        // Ultimate goal: 1TB (will auto-stop when reached)
-      minMoneyReserve: 1000000, // Keep at least $1m after purchase
-      checkInterval: 30000    // Check for upgrades every 30 seconds
+    // RAM upgrader settings
+    ramUpgrader: {
+      enabled: true,          // Auto-launch RAM upgrader
+      script: "ram-upgrader.js"
     },
     
     // Module definitions
@@ -210,76 +207,7 @@ export async function main(ns) {
     return `$${num.toFixed(2)}`;
   }
   
-  // Helper: Check if RAM upgrade should be prioritized
-  function isRAMUpgradePriority() {
-    if (!CONFIG.ramUpgrade.enabled || !CONFIG.ramUpgrade.priority) return false;
-    if (!ns.singularity?.getUpgradeHomeRamCost) return false;
-    
-    const currentRAM = ns.getServerMaxRam("home");
-    if (currentRAM >= CONFIG.ramUpgrade.targetRAM) return false;
-    
-    // RAM upgrade is priority if we have failed modules
-    return failedModules.length > 0;
-  }
-  
-  // Helper: Check if we should upgrade home RAM
-  function shouldUpgradeRAM() {
-    if (!CONFIG.ramUpgrade.enabled) return false;
-    
-    const currentRAM = ns.getServerMaxRam("home");
-    if (currentRAM >= CONFIG.ramUpgrade.targetRAM) return false;
-    
-    const upgradeCost = ns.singularity?.getUpgradeHomeRamCost?.();
-    if (!upgradeCost) return false; // No singularity access
-    
-    const currentMoney = ns.getPlayer().money;
-    const afterPurchase = currentMoney - upgradeCost;
-    
-    return afterPurchase >= CONFIG.ramUpgrade.minMoneyReserve;
-  }
-  
-  // Helper: Get how much money we're saving for RAM
-  function getRAMSavingTarget() {
-    if (!isRAMUpgradePriority()) return 0;
-    
-    const upgradeCost = ns.singularity?.getUpgradeHomeRamCost?.();
-    if (!upgradeCost) return 0;
-    
-    return upgradeCost + CONFIG.ramUpgrade.minMoneyReserve;
-  }
-  
-  // Helper: Upgrade home RAM
-  async function upgradeHomeRAM() {
-    const currentRAM = ns.getServerMaxRam("home");
-    const upgradeCost = ns.singularity?.getUpgradeHomeRamCost?.();
-    
-    if (!upgradeCost) return false;
-    
-    ns.print("");
-    ns.print("═════════════════════════════════════════════════════════");
-    ns.print("💰 UPGRADING HOME RAM!");
-    ns.print("═════════════════════════════════════════════════════════");
-    ns.print(`Current RAM: ${currentRAM}GB → ${currentRAM * 2}GB`);
-    ns.print(`Cost: ${formatMoney(upgradeCost)}`);
-    
-    const success = ns.singularity.upgradeHomeRam();
-    
-    if (success) {
-      ns.print("✓ RAM upgraded successfully!");
-      ns.print("");
-      ns.print("Attempting to launch failed modules with new RAM...");
-      ns.print("═════════════════════════════════════════════════════════");
-      ns.print("");
-      
-      return true;
-    } else {
-      ns.print("✗ RAM upgrade failed!");
-      ns.print("═════════════════════════════════════════════════════════");
-      ns.print("");
-      return false;
-    }
-  }
-  
+
   // Helper: Try to launch failed modules
   async function launchFailedModules(availableAPIs, failedModules) {
     let newlyStarted = 0;
@@ -387,52 +315,27 @@ export async function main(ns) {
     }
   }
   
-  // Show RAM upgrade status
-  if (CONFIG.ramUpgrade.enabled && availableAPIs.singularity) {
-    const currentRAM = ns.getServerMaxRam("home");
-    const usedRAM = ns.getServerUsedRam("home");
-    const freeRAM = currentRAM - usedRAM;
-    const upgradeCost = ns.singularity.getUpgradeHomeRamCost();
-    const currentMoney = ns.getPlayer().money;
-    const savingTarget = getRAMSavingTarget();
-    
-    ns.print("");
-    ns.print("RAM Status:");
-    ns.print(`  Current: ${currentRAM}GB (${freeRAM.toFixed(1)}GB free)`);
-    
-    if (failedModules.length > 0) {
-      ns.print(`  ⚠️  ${failedModules.length} modules failed (likely insufficient RAM)`);
-      ns.print(`  Next upgrade: ${currentRAM}GB → ${currentRAM * 2}GB (${formatMoney(upgradeCost)})`);
-      
-      if (CONFIG.ramUpgrade.priority && isRAMUpgradePriority()) {
-        ns.print(`  🎯 PRIORITY MODE: Saving for RAM upgrade first!`);
-        const remaining = savingTarget - currentMoney;
-        if (remaining > 0) {
-          ns.print(`  💰 Need ${formatMoney(remaining)} more (${((currentMoney/savingTarget)*100).toFixed(1)}% saved)`);
-        } else {
-          ns.print(`  💰 Ready to upgrade! Will upgrade in next check...`);
-        }
-      } else {
-        ns.print(`  💰 Auto-upgrade enabled! Will upgrade when affordable.`);
-      }
-    } else if (currentRAM < CONFIG.ramUpgrade.targetRAM) {
-      ns.print(`  Next upgrade: ${currentRAM}GB → ${currentRAM * 2}GB (${formatMoney(upgradeCost)})`);
-      ns.print(`  💰 Auto-upgrade enabled!`);
-    } else {
-      ns.print(`  ✓ Target RAM reached (${CONFIG.ramUpgrade.targetRAM}GB)`);
+  // Show RAM status (no expensive calls)
+  const currentRAM = ns.getServerMaxRam("home");
+  const usedRAM = ns.getServerUsedRam("home");
+  const freeRAM = currentRAM - usedRAM;
+  
+  ns.print("");
+  ns.print("RAM Status:");
+  ns.print(`  Current: ${currentRAM}GB (${freeRAM.toFixed(1)}GB free)`);
+  
+  if (failedModules.length > 0) {
+    ns.print(`  ⚠️  ${failedModules.length} modules failed (likely insufficient RAM)`);
+    if (CONFIG.ramUpgrader.enabled && availableAPIs.singularity) {
+      ns.print(`  💰 RAM upgrader will auto-upgrade when affordable`);
+    } else if (!availableAPIs.singularity) {
+      ns.print(`  ℹ️  Unlock SF4 for automatic RAM upgrades`);
     }
   }
   
   ns.print("");
   ns.print("═════════════════════════════════════════════════════════");
   ns.print("✅ All automation launched! Monitoring for crashes...");
-  if (CONFIG.ramUpgrade.enabled && failedModules.length > 0) {
-    ns.print("💰 Will auto-upgrade RAM to launch failed modules");
-    if (CONFIG.ramUpgrade.priority) {
-      ns.print("🎯 RAM UPGRADE PRIORITY MODE ACTIVE");
-      ns.print("   System will focus on RAM upgrades first!");
-    }
-  }
   ns.print("═════════════════════════════════════════════════════════");
   ns.print("");
   
@@ -444,19 +347,36 @@ export async function main(ns) {
       dashboardPID = ns.run(CONFIG.dashboard.script, 1, `--refresh`, CONFIG.dashboard.refreshRate);
       if (dashboardPID > 0) {
         ns.print(`✓ Dashboard started! (PID: ${dashboardPID})`);
-        ns.print("   Monitor your automation in real-time!");
       } else {
         ns.print("⚠️  Dashboard failed to start (insufficient RAM?)");
       }
     } catch (e) {
       ns.print(`⚠️  Dashboard error: ${e}`);
     }
-    ns.print("");
   }
   
-  // Main monitoring loop
-  let lastRAMCheck = Date.now();
+  // Launch RAM upgrader automatically (if SF4 available)
+  let ramUpgraderPID = 0;
+  if (CONFIG.ramUpgrader.enabled && availableAPIs.singularity && scriptExists(CONFIG.ramUpgrader.script)) {
+    ns.print("💰 Launching RAM upgrader...");
+    try {
+      ramUpgraderPID = ns.run(CONFIG.ramUpgrader.script, 1);
+      if (ramUpgraderPID > 0) {
+        ns.print(`✓ RAM upgrader started! (PID: ${ramUpgraderPID})`);
+        if (failedModules.length > 0) {
+          ns.print(`   Will auto-upgrade RAM to launch ${failedModules.length} failed modules`);
+        }
+      } else {
+        ns.print("⚠️  RAM upgrader failed to start (insufficient RAM?)");
+      }
+    } catch (e) {
+      ns.print(`⚠️  RAM upgrader error: ${e}`);
+    }
+  }
   
+  ns.print("");
+  
+  // Main monitoring loop
   while (true) {
     await ns.sleep(CONFIG.checkInterval);
     
@@ -473,6 +393,23 @@ export async function main(ns) {
         }
       } catch (e) {
         ns.print(`✗ Dashboard restart error: ${e}`);
+      }
+      ns.print("");
+    }
+    
+    // Check RAM upgrader
+    if (ramUpgraderPID > 0 && !isProcessRunning(ramUpgraderPID)) {
+      ns.print("");
+      ns.print("⚠️  RAM upgrader stopped! Restarting...");
+      try {
+        ramUpgraderPID = ns.run(CONFIG.ramUpgrader.script, 1);
+        if (ramUpgraderPID > 0) {
+          ns.print("✓ RAM upgrader restarted successfully");
+        } else {
+          ns.print("✗ RAM upgrader restart failed");
+        }
+      } catch (e) {
+        ns.print(`✗ RAM upgrader restart error: ${e}`);
       }
       ns.print("");
     }
@@ -507,46 +444,8 @@ export async function main(ns) {
       }
     }
     
-    // Check if we should upgrade RAM
-    const now = Date.now();
-    if (CONFIG.ramUpgrade.enabled && 
-        failedModules.length > 0 && 
-        now - lastRAMCheck >= CONFIG.ramUpgrade.checkInterval) {
-      
-      lastRAMCheck = now;
-      
-      if (shouldUpgradeRAM()) {
-        const upgraded = await upgradeHomeRAM();
-        
-        if (upgraded) {
-          // Try to launch failed modules with new RAM
-          const newlyStarted = await launchFailedModules(availableAPIs, failedModules);
-          
-          if (newlyStarted > 0) {
-            ns.print(`✓ Successfully started ${newlyStarted} additional modules!`);
-            
-            // Remove successfully started modules from failed list
-            const stillFailed = [];
-            for (const moduleKey of failedModules) {
-              if (!runningProcesses.has(moduleKey)) {
-                stillFailed.push(moduleKey);
-              }
-            }
-            failedModules.length = 0;
-            failedModules.push(...stillFailed);
-            
-            if (failedModules.length === 0) {
-              ns.print("🎉 All modules now running!");
-            } else {
-              ns.print(`⚠️  ${failedModules.length} modules still need more RAM`);
-            }
-          } else {
-            ns.print("⚠️  Still not enough RAM for remaining modules");
-          }
-          ns.print("");
-        }
-      }
-    }
+    // Note: RAM upgrades are now handled by ram-upgrader.js
+    // It runs as a separate process and will restart failed modules after upgrading
     
     // Periodic status update
     if (runningProcesses.size > 0) {
@@ -564,31 +463,8 @@ export async function main(ns) {
       ns.print(`Running: ${runningProcesses.size} modules`);
       if (failedModules.length > 0) {
         ns.print(`Waiting for RAM: ${failedModules.length} modules`);
-        
-        if (CONFIG.ramUpgrade.enabled && availableAPIs.singularity) {
-          const upgradeCost = ns.singularity.getUpgradeHomeRamCost();
-          const currentMoney = ns.getPlayer().money;
-          const savingTarget = getRAMSavingTarget();
-          
-          if (isRAMUpgradePriority()) {
-            // Priority mode - show progress toward RAM
-            ns.print(`🎯 PRIORITY: Saving for RAM upgrade`);
-            const remaining = savingTarget - currentMoney;
-            if (remaining > 0) {
-              const percent = ((currentMoney/savingTarget)*100).toFixed(1);
-              ns.print(`💰 Progress: ${formatMoney(currentMoney)} / ${formatMoney(savingTarget)} (${percent}%)`);
-            } else {
-              ns.print(`💰 Upgrading RAM soon... (${formatMoney(upgradeCost)})`);
-            }
-          } else {
-            // Normal mode
-            if (currentMoney >= upgradeCost + CONFIG.ramUpgrade.minMoneyReserve) {
-              ns.print(`💰 Upgrading RAM soon... (${formatMoney(upgradeCost)})`);
-            } else {
-              const needed = upgradeCost + CONFIG.ramUpgrade.minMoneyReserve - currentMoney;
-              ns.print(`💰 Saving for RAM upgrade (need ${formatMoney(needed)} more)`);
-            }
-          }
+        if (ramUpgraderPID > 0) {
+          ns.print(`💰 RAM upgrader running (check its window for progress)`);
         }
       }
       ns.print("");
