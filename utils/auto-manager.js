@@ -143,9 +143,27 @@ export async function main(ns) {
     modules: { ...CONFIG.modules, ...args.modules }
   };
   
+  // Check API availability without loading modules
+  function checkAPIAvailability() {
+    return {
+      singularity: ns.singularity !== undefined,
+      bladeburner: ns.bladeburner !== undefined,
+      gang: (function() {
+        try { return ns.gang !== undefined && ns.gang.inGang(); }
+        catch (e) { return false; }
+      })(),
+      corporation: (function() {
+        try { return ns.corporation !== undefined; }
+        catch (e) { return false; }
+      })(),
+      go: ns.go !== undefined
+    };
+  }
+  
   // Initialize all automation modules using dynamic imports
-  // This reduces RAM cost - only loads modules that are enabled
+  // Only loads modules if: (1) enabled AND (2) API available
   async function loadModules() {
+    const apis = checkAPIAvailability();
     const loadedModules = {
       factions: null,
       augmentations: null,
@@ -156,54 +174,66 @@ export async function main(ns) {
       go: null
     };
     
-    try {
-      if (config.modules.factions) {
+    // Singularity modules (need SF4)
+    if (config.modules.factions && apis.singularity) {
+      try {
         const { FactionManager } = await import('../modules/faction-manager.js');
         loadedModules.factions = new FactionManager(ns);
-      }
-    } catch (e) { ns.print(`⚠️ Could not load faction-manager: ${e}`); }
+        ns.print(`✓ Loaded faction-manager`);
+      } catch (e) { ns.print(`⚠️ Could not load faction-manager: ${e}`); }
+    }
     
-    try {
-      if (config.modules.augmentations) {
+    if (config.modules.augmentations && apis.singularity) {
+      try {
         const { AugmentationTracker } = await import('../modules/augmentation-tracker.js');
         loadedModules.augmentations = new AugmentationTracker(ns);
-      }
-    } catch (e) { ns.print(`⚠️ Could not load augmentation-tracker: ${e}`); }
+        ns.print(`✓ Loaded augmentation-tracker`);
+      } catch (e) { ns.print(`⚠️ Could not load augmentation-tracker: ${e}`); }
+    }
     
-    try {
-      if (config.modules.companies) {
+    if (config.modules.companies && apis.singularity) {
+      try {
         const { CompanyAutomator } = await import('../modules/company-automator.js');
         loadedModules.companies = new CompanyAutomator(ns);
-      }
-    } catch (e) { ns.print(`⚠️ Could not load company-automator: ${e}`); }
+        ns.print(`✓ Loaded company-automator`);
+      } catch (e) { ns.print(`⚠️ Could not load company-automator: ${e}`); }
+    }
     
-    try {
-      if (config.modules.bladeburner) {
+    // Bladeburner module (need SF6/SF7)
+    if (config.modules.bladeburner && apis.bladeburner) {
+      try {
         const { BladeburnerCommander } = await import('../modules/bladeburner-commander.js');
         loadedModules.bladeburner = new BladeburnerCommander(ns);
-      }
-    } catch (e) { ns.print(`⚠️ Could not load bladeburner-commander: ${e}`); }
+        ns.print(`✓ Loaded bladeburner-commander`);
+      } catch (e) { ns.print(`⚠️ Could not load bladeburner-commander: ${e}`); }
+    }
     
-    try {
-      if (config.modules.gangs) {
+    // Gang module (need SF2 + in gang)
+    if (config.modules.gangs && apis.gang) {
+      try {
         const { GangManager } = await import('../modules/gang-manager.js');
         loadedModules.gangs = new GangManager(ns);
-      }
-    } catch (e) { ns.print(`⚠️ Could not load gang-manager: ${e}`); }
+        ns.print(`✓ Loaded gang-manager`);
+      } catch (e) { ns.print(`⚠️ Could not load gang-manager: ${e}`); }
+    }
     
-    try {
-      if (config.modules.corporations) {
+    // Corporation module (need SF3)
+    if (config.modules.corporations && apis.corporation) {
+      try {
         const { CorporationManager } = await import('../modules/corporation-manager.js');
         loadedModules.corporations = new CorporationManager(ns);
-      }
-    } catch (e) { ns.print(`⚠️ Could not load corporation-manager: ${e}`); }
+        ns.print(`✓ Loaded corporation-manager`);
+      } catch (e) { ns.print(`⚠️ Could not load corporation-manager: ${e}`); }
+    }
     
-    try {
-      if (config.modules.go) {
+    // Go module (just needs Go unlocked)
+    if (config.modules.go && apis.go) {
+      try {
         const { GoCommander } = await import('../modules/go-commander.js');
         loadedModules.go = new GoCommander(ns);
-      }
-    } catch (e) { ns.print(`⚠️ Could not load go-commander: ${e}`); }
+        ns.print(`✓ Loaded go-commander`);
+      } catch (e) { ns.print(`⚠️ Could not load go-commander: ${e}`); }
+    }
     
     return loadedModules;
   }
@@ -1082,18 +1112,40 @@ export async function main(ns) {
   
   // Show enabled modules
   const enabledModules = [];
+  const lockedModules = [];
+  
+  // Core modules (always available)
   if (config.modules.hacking) enabledModules.push("Hacking");
   if (config.modules.servers) enabledModules.push("Servers");
   if (config.modules.hacknet) enabledModules.push("Hacknet");
-  if (modules.factions) enabledModules.push("Factions" + (modules.factions.hasSingularityAccess() ? "" : " (locked)"));
-  if (modules.companies) enabledModules.push("Companies" + (modules.companies.hasSingularityAccess() ? "" : " (locked)"));
-  if (modules.augmentations) enabledModules.push("Augmentations" + (modules.augmentations.hasSingularityAccess() ? "" : " (locked)"));
-  if (modules.bladeburner) enabledModules.push("Bladeburner" + (modules.bladeburner.hasBladeburnerAccess() ? "" : " (locked)"));
-  if (modules.gangs) enabledModules.push("Gangs" + (modules.gangs.hasGangAccess() ? "" : " (locked)"));
-  if (modules.corporations) enabledModules.push("Corporations" + (modules.corporations.hasCorporationAccess() ? "" : " (locked)"));
-  if (modules.go) enabledModules.push("Go" + (modules.go.hasGoAccess() ? "" : " (locked)"));
   
-  ns.print(`Enabled Modules: ${enabledModules.join(', ')}`);
+  // Optional modules (loaded if available)
+  if (modules.factions) enabledModules.push("Factions");
+  else if (config.modules.factions) lockedModules.push("Factions (need SF4)");
+  
+  if (modules.companies) enabledModules.push("Companies");
+  else if (config.modules.companies) lockedModules.push("Companies (need SF4)");
+  
+  if (modules.augmentations) enabledModules.push("Augmentations");
+  else if (config.modules.augmentations) lockedModules.push("Augmentations (need SF4)");
+  
+  if (modules.bladeburner) enabledModules.push("Bladeburner");
+  else if (config.modules.bladeburner) lockedModules.push("Bladeburner (need SF6/SF7)");
+  
+  if (modules.gangs) enabledModules.push("Gangs");
+  else if (config.modules.gangs) lockedModules.push("Gangs (need SF2)");
+  
+  if (modules.corporations) enabledModules.push("Corporations");
+  else if (config.modules.corporations) lockedModules.push("Corporations (need SF3)");
+  
+  if (modules.go) enabledModules.push("Go");
+  else if (config.modules.go) lockedModules.push("Go (not unlocked)");
+  
+  ns.print(`Active Modules: ${enabledModules.join(', ')}`);
+  if (lockedModules.length > 0) {
+    ns.print(`Locked Modules: ${lockedModules.join(', ')}`);
+    ns.print(`(Modules will auto-enable when APIs unlock)`);
+  }
   ns.print("═════════════════════════════════════════════════════════");
 
   if (mode === 'monitor') {
