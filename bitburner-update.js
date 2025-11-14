@@ -49,7 +49,8 @@ export async function main(ns) {
       { file: "go4.js", folder: folders.root },
       { file: "hacknet-farm-manager.js", folder: folders.root },
       { file: "bitnode-progression.js", folder: folders.root },
-      { file: "sf4-roadmap.js", folder: folders.root }
+      { file: "sf4-roadmap.js", folder: folders.root },
+      { file: "bootstrap-income.js", folder: folders.root }
     ],
     
     batch: [
