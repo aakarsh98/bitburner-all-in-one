@@ -12,7 +12,7 @@ export async function main(ns) {
   // ============================================
   // CONFIGURATION - UPDATE THIS URL
   // ============================================
-  const baseUrl = "https://raw.githubusercontent.com/r3c0n75/bitburner-scripts/main";
+  const baseUrl = "https://raw.githubusercontent.com/aakarsh98/bitburner-all-in-one/main";
   
   // Folder paths in your GitHub repo (scripts/ folder IS the repo root)
   const folders = {
@@ -21,7 +21,9 @@ export async function main(ns) {
     analysis: { url: `${baseUrl}/analysis`, local: "analysis" },
     utils: { url: `${baseUrl}/utils`, local: "utils" },
     deploy: { url: `${baseUrl}/deploy`, local: "deploy" },
-    stocks: { url: `${baseUrl}/stocks`, local: "stocks" }
+    stocks: { url: `${baseUrl}/stocks`, local: "stocks" },
+    modules: { url: `${baseUrl}/modules`, local: "modules" },
+    root: { url: baseUrl, local: "" }
   };
   
   // Define script categories with their folder locations
@@ -32,11 +34,15 @@ export async function main(ns) {
       { file: "attack-weaken.js", folder: folders.core },
       { file: "simple-batcher.js", folder: folders.batch },
       { file: "smart-batcher.js", folder: folders.batch },
+      { file: "batch-manager.js", folder: folders.batch },
       { file: "profit-scan.js", folder: folders.analysis },
       { file: "profit-scan-flex.js", folder: folders.analysis },
       { file: "f-profit-scan-flex.js", folder: folders.analysis },
       { file: "production-monitor.js", folder: folders.analysis },
-      { file: "estimate-production.js", folder: folders.analysis }
+      { file: "estimate-production.js", folder: folders.analysis },
+      { file: "auto-manager.js", folder: folders.utils },
+      { file: "go4.js", folder: folders.root },
+      { file: "hacknet-farm-manager.js", folder: folders.root }
     ],
     
     batch: [
@@ -78,6 +84,16 @@ export async function main(ns) {
       { file: "stock-momentum-analyzer.js", folder: folders.stocks },
       { file: "stock-monitor.js", folder: folders.stocks },
       { file: "close-all-stock.js", folder: folders.stocks }
+    ],
+    
+    modules: [
+      { file: "faction-manager.js", folder: folders.modules },
+      { file: "augmentation-tracker.js", folder: folders.modules },
+      { file: "company-automator.js", folder: folders.modules },
+      { file: "bladeburner-commander.js", folder: folders.modules },
+      { file: "gang-manager.js", folder: folders.modules },
+      { file: "corporation-manager.js", folder: folders.modules },
+      { file: "go-commander.js", folder: folders.modules }
     ]
   };
 
@@ -90,6 +106,7 @@ export async function main(ns) {
   const downloadBatch = args.includes("--batch");
   const downloadDeploy = args.includes("--deploy");
   const downloadStocks = args.includes("--stocks");
+  const downloadModules = args.includes("--modules");
 
   // Determine which files to download
   let filesToDownload = [];
@@ -101,7 +118,8 @@ export async function main(ns) {
       ...scripts.analysis,
       ...scripts.utils,
       ...scripts.deploy,
-      ...scripts.stocks
+      ...scripts.stocks,
+      ...scripts.modules
     ];
   } else {
     if (downloadEssential) filesToDownload.push(...scripts.essential);
@@ -110,6 +128,7 @@ export async function main(ns) {
     if (downloadUtils) filesToDownload.push(...scripts.utils);
     if (downloadDeploy) filesToDownload.push(...scripts.deploy);
     if (downloadStocks) filesToDownload.push(...scripts.stocks);
+    if (downloadModules) filesToDownload.push(...scripts.modules);
   }
 
   // Download files
