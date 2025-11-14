@@ -40,6 +40,17 @@ run auto-launcher.js
 
 **Each module runs as a SEPARATE process** - modular architecture, automated management!
 
+### Smart RAM Priority System
+
+When modules can't start due to insufficient RAM, the system automatically:
+- 🎯 **Prioritizes RAM upgrades** above other spending
+- 💰 **Saves money** specifically for RAM (cost + $1m reserve)
+- 📊 **Shows progress** toward upgrade goal (X% saved)
+- ⚡ **Upgrades immediately** when affordable
+- 🚀 **Launches failed modules** right after upgrade
+
+**Priority mode activates automatically** when modules are waiting for RAM!
+
 ### Alternative: Manual Module Launch
 
 If you want granular control, run modules individually:

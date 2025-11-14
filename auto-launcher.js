@@ -208,6 +208,18 @@ export async function main(ns) {
     return `$${num.toFixed(2)}`;
   }
   
+  // Helper: Check if RAM upgrade should be prioritized
+  function isRAMUpgradePriority() {
+    if (!CONFIG.ramUpgrade.enabled || !CONFIG.ramUpgrade.priority) return false;
+    if (!ns.singularity?.getUpgradeHomeRamCost) return false;
+    
+    const currentRAM = ns.getServerMaxRam("home");
+    if (currentRAM >= CONFIG.ramUpgrade.targetRAM) return false;
+    
+    // RAM upgrade is priority if we have failed modules
+    return failedModules.length > 0;
+  }
+  
   // Helper: Check if we should upgrade home RAM
   function shouldUpgradeRAM() {
     if (!CONFIG.ramUpgrade.enabled) return false;
@@ -222,6 +234,16 @@ export async function main(ns) {
     const afterPurchase = currentMoney - upgradeCost;
     
     return afterPurchase >= CONFIG.ramUpgrade.minMoneyReserve;
+  }
+  
+  // Helper: Get how much money we're saving for RAM
+  function getRAMSavingTarget() {
+    if (!isRAMUpgradePriority()) return 0;
+    
+    const upgradeCost = ns.singularity?.getUpgradeHomeRamCost?.();
+    if (!upgradeCost) return 0;
+    
+    return upgradeCost + CONFIG.ramUpgrade.minMoneyReserve;
   }
   
   // Helper: Upgrade home RAM
@@ -369,6 +391,8 @@ export async function main(ns) {
     const usedRAM = ns.getServerUsedRam("home");
     const freeRAM = currentRAM - usedRAM;
     const upgradeCost = ns.singularity.getUpgradeHomeRamCost();
+    const currentMoney = ns.getPlayer().money;
+    const savingTarget = getRAMSavingTarget();
     
     ns.print("");
     ns.print("RAM Status:");
@@ -377,7 +401,18 @@ export async function main(ns) {
     if (failedModules.length > 0) {
       ns.print(`  ⚠️  ${failedModules.length} modules failed (likely insufficient RAM)`);
       ns.print(`  Next upgrade: ${currentRAM}GB → ${currentRAM * 2}GB (${formatMoney(upgradeCost)})`);
-      ns.print(`  💰 Auto-upgrade enabled! Will upgrade when affordable.`);
+      
+      if (CONFIG.ramUpgrade.priority && isRAMUpgradePriority()) {
+        ns.print(`  🎯 PRIORITY MODE: Saving for RAM upgrade first!`);
+        const remaining = savingTarget - currentMoney;
+        if (remaining > 0) {
+          ns.print(`  💰 Need ${formatMoney(remaining)} more (${((currentMoney/savingTarget)*100).toFixed(1)}% saved)`);
+        } else {
+          ns.print(`  💰 Ready to upgrade! Will upgrade in next check...`);
+        }
+      } else {
+        ns.print(`  💰 Auto-upgrade enabled! Will upgrade when affordable.`);
+      }
     } else if (currentRAM < CONFIG.ramUpgrade.targetRAM) {
       ns.print(`  Next upgrade: ${currentRAM}GB → ${currentRAM * 2}GB (${formatMoney(upgradeCost)})`);
       ns.print(`  💰 Auto-upgrade enabled!`);
@@ -391,6 +426,10 @@ export async function main(ns) {
   ns.print("✅ All automation launched! Monitoring for crashes...");
   if (CONFIG.ramUpgrade.enabled && failedModules.length > 0) {
     ns.print("💰 Will auto-upgrade RAM to launch failed modules");
+    if (CONFIG.ramUpgrade.priority) {
+      ns.print("🎯 RAM UPGRADE PRIORITY MODE ACTIVE");
+      ns.print("   System will focus on RAM upgrades first!");
+    }
   }
   ns.print("═════════════════════════════════════════════════════════");
   ns.print("");
@@ -527,11 +566,26 @@ export async function main(ns) {
         if (CONFIG.ramUpgrade.enabled && availableAPIs.singularity) {
           const upgradeCost = ns.singularity.getUpgradeHomeRamCost();
           const currentMoney = ns.getPlayer().money;
-          if (currentMoney >= upgradeCost + CONFIG.ramUpgrade.minMoneyReserve) {
-            ns.print(`💰 Upgrading RAM soon... (${formatMoney(upgradeCost)})`);
+          const savingTarget = getRAMSavingTarget();
+          
+          if (isRAMUpgradePriority()) {
+            // Priority mode - show progress toward RAM
+            ns.print(`🎯 PRIORITY: Saving for RAM upgrade`);
+            const remaining = savingTarget - currentMoney;
+            if (remaining > 0) {
+              const percent = ((currentMoney/savingTarget)*100).toFixed(1);
+              ns.print(`💰 Progress: ${formatMoney(currentMoney)} / ${formatMoney(savingTarget)} (${percent}%)`);
+            } else {
+              ns.print(`💰 Upgrading RAM soon... (${formatMoney(upgradeCost)})`);
+            }
           } else {
-            const needed = upgradeCost + CONFIG.ramUpgrade.minMoneyReserve - currentMoney;
-            ns.print(`💰 Saving for RAM upgrade (need ${formatMoney(needed)} more)`);
+            // Normal mode
+            if (currentMoney >= upgradeCost + CONFIG.ramUpgrade.minMoneyReserve) {
+              ns.print(`💰 Upgrading RAM soon... (${formatMoney(upgradeCost)})`);
+            } else {
+              const needed = upgradeCost + CONFIG.ramUpgrade.minMoneyReserve - currentMoney;
+              ns.print(`💰 Saving for RAM upgrade (need ${formatMoney(needed)} more)`);
+            }
           }
         }
       }
